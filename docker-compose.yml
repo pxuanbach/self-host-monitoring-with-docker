@@ -1,0 +1,60 @@
+services:
+
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+    restart: always
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.ignored-mount-points='^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'"
+    expose:
+      - 9100
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: 5
+
+  prometheus:
+    image: prom/prometheus:v2.26.0
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: 5
+
+  grafana:
+    image: grafana/grafana:7.5.1-ubuntu
+    restart: always
+    ports:
+        - 3000:3000
+    depends_on:
+        - prometheus
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: 5
+
+
+volumes:
+  prometheus_data: {}

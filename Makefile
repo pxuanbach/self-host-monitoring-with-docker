@@ -10,3 +10,12 @@ down:
 
 downv:
 	$(COMPOSE_CMD) down -v
+
+up-sub:
+	$(COMPOSE_CMD) -f docker-compose.sub-node.yml up -d
+
+down-sub:
+	$(COMPOSE_CMD) -f docker-compose.sub-node.yml down
+
+downv-sub:
+	$(COMPOSE_CMD) -f docker-compose.sub-node.yml down
